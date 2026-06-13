@@ -1,30 +1,24 @@
-data "terraform_remote_state" "roboshop_vpc" {
-
+data "terraform_remote_state" "vpc" {
   backend = "s3"
 
   config = {
-    bucket = "roboshop-terraform-state"
+    bucket = "roboshop-tf-state"
     key    = "dev/bootstrap/vpc/terraform.tfstate"
-    region = "us-east-1"
+    region = var.aws_region
   }
 }
 
-data "aws_ami" "amazon_linux_2" {
+data "aws_ami" "amazon_linux_2023" {
   most_recent = true
   owners      = ["amazon"]
 
   filter {
     name   = "name"
-    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+    values = ["al2023-ami-*-x86_64"]
   }
 }
 
-data "terraform_remote_state" "jenkins_vpc" {
-  backend = "s3"
-
-  config = {
-    bucket = "opttimusprime-jenkins-tf-state"
-    key    = "jenkins/dev/terraform.tfstate"
-    region = "us-east-1"
-  }
+data "aws_route53_zone" "main" {
+  name         = var.domain_name
+  private_zone = false
 }

@@ -1,6 +1,11 @@
-aws_region      = "us-east-1"
-project         = "roboshop"
-environment     = "dev"
+project     = "roboshop"
+environment = "dev"
+aws_region  = "us-east-1"
 
-jenkins_vpc_cidr = "10.50.0.0/16"
-key_name         = "roboshop-dev-keypair"
+instance_type = "c7i-flex.large"
+key_name      = "roboshop-dev-keypair"
+
+allowed_ssh_cidr      = "0.0.0.0/0"
+allowed_sonarqube_cidr = "0.0.0.0/0"
+
+domain_name = "optimusprime.uno"

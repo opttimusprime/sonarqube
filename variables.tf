@@ -1,13 +1,16 @@
-variable "aws_region" {}
 variable "project" {}
 variable "environment" {}
-
-variable "vpc_id" {}
-variable "public_subnet_id" {}
-variable "jenkins_vpc_cidr" {}
+variable "aws_region" {}
 
 variable "instance_type" {
-  default = "t3.medium"
+  default = "c7i-flex.large"
 }
 
 variable "key_name" {}
+
+variable "allowed_ssh_cidr" {}
+variable "allowed_sonarqube_cidr" {}
+
+variable "domain_name" {
+  default = "optimusprime.uno"
+}
