@@ -59,4 +59,4 @@ volumes:
   sonarqube_extensions:
 EOF
 
-docker compose up -d
+docker-compose up -d
