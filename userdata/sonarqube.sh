@@ -2,7 +2,7 @@
 set -e
 
 dnf update -y
-dnf install -y docker
+dnf install -y docker docker-compose-plugin
 
 systemctl enable docker
 systemctl start docker
@@ -21,8 +21,6 @@ mkdir -p /opt/sonarqube
 cd /opt/sonarqube
 
 cat > docker-compose.yml <<EOF
-version: "3.8"
-
 services:
   postgres:
     image: postgres:15
@@ -59,4 +57,4 @@ volumes:
   sonarqube_extensions:
 EOF
 
-docker-compose up -d
+docker compose up -d
