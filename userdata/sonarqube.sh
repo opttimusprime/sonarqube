@@ -2,7 +2,7 @@
 set -e
 
 dnf update -y
-dnf install -y docker docker-compose-plugin
+dnf install -y docker
 
 systemctl enable docker
 systemctl start docker
@@ -17,44 +17,34 @@ vm.max_map_count=262144
 fs.file-max=65536
 EOF
 
-mkdir -p /opt/sonarqube
-cd /opt/sonarqube
+docker network create sonarqube-net || true
 
-cat > docker-compose.yml <<EOF
-services:
-  postgres:
-    image: postgres:15
-    container_name: sonarqube-postgres
-    restart: always
-    environment:
-      POSTGRES_USER: sonar
-      POSTGRES_PASSWORD: sonarpassword
-      POSTGRES_DB: sonarqube
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+docker volume create sonarqube_postgres_data || true
+docker volume create sonarqube_data || true
+docker volume create sonarqube_logs || true
+docker volume create sonarqube_extensions || true
 
-  sonarqube:
-    image: sonarqube:community
-    container_name: sonarqube
-    restart: always
-    depends_on:
-      - postgres
-    ports:
-      - "9000:9000"
-    environment:
-      SONAR_JDBC_URL: jdbc:postgresql://postgres:5432/sonarqube
-      SONAR_JDBC_USERNAME: sonar
-      SONAR_JDBC_PASSWORD: sonarpassword
-    volumes:
-      - sonarqube_data:/opt/sonarqube/data
-      - sonarqube_logs:/opt/sonarqube/logs
-      - sonarqube_extensions:/opt/sonarqube/extensions
+docker run -d \
+  --name sonarqube-postgres \
+  --restart always \
+  --network sonarqube-net \
+  -e POSTGRES_USER=sonar \
+  -e POSTGRES_PASSWORD=sonarpassword \
+  -e POSTGRES_DB=sonarqube \
+  -v sonarqube_postgres_data:/var/lib/postgresql/data \
+  postgres:15
 
-volumes:
-  postgres_data:
-  sonarqube_data:
-  sonarqube_logs:
-  sonarqube_extensions:
-EOF
+sleep 30
 
-docker compose up -d
+docker run -d \
+  --name sonarqube \
+  --restart always \
+  --network sonarqube-net \
+  -p 9000:9000 \
+  -e SONAR_JDBC_URL=jdbc:postgresql://sonarqube-postgres:5432/sonarqube \
+  -e SONAR_JDBC_USERNAME=sonar \
+  -e SONAR_JDBC_PASSWORD=sonarpassword \
+  -v sonarqube_data:/opt/sonarqube/data \
+  -v sonarqube_logs:/opt/sonarqube/logs \
+  -v sonarqube_extensions:/opt/sonarqube/extensions \
+  sonarqube:community
